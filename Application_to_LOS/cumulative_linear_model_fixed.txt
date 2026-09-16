@@ -1,0 +1,96 @@
+# Normal likelihood, identity link
+# Random effects model for multi-arm trials
+
+
+model{                               
+for(i in 1:Ntrials){                      	#   LOOP THROUGH STUDIES
+    w[i,1] <- 0    				# adjustment for multi-arm trials is zero for control arm
+    delta[i,1] <- 0             		# treatment effect is zero for control arm
+    mu[i] ~ dnorm(0,.01)           		# vague priors for all trial baselines
+
+    for (k in 1:na[i]) {             		#  LOOP THROUGH ARMS
+        prec[i,k] <- n[i,k]/pow(sd[i,k],2)   	# set precisions
+        y[i,k] ~ dnorm(theta[i,k],prec[i,k]) 	# normal likelihood
+        theta[i,k] <- mu[i] + delta[i,k]     	# model for linear predictor
+
+	#Deviance contribution
+        dev[i,k] <- (y[i,k]-theta[i,k])*(y[i,k]-theta[i,k])*prec[i,k]
+
+ }
+
+    	#  summed residual deviance contribution for this trial
+    	resdev[i] <- sum(dev[i,1:na[i]]) 
+      
+	# LOOP THROUGH ARMS
+    	for (k in 2:na[i]) {             	
+		# trial-specific treatment effect distributions
+        	delta[i,k]<- md[i,k]
+
+		# mean of treatment effect distributions, with multi-arm trial correction
+                md[i,k] <- (inprod(d[2:nt], components[i, k, ]) + beta * tnc[i, k]) - (inprod(d[2:nt], components[i, 1, ]) + beta * tnc[i, 1]) + sw[i,k]
+
+		# adjustment, multi-arm RCTs
+		w[i,k] <- delta[i,k] - (inprod(d[2:nt], components[i, k, ]) + beta * tnc[i, k]) + (inprod(d[2:nt], components[i, 1, ]) + beta * tnc[i, 1])
+
+		# cumulative adjustment for multi-arm trials
+        	sw[i,k] <- sum(w[i,1:k-1])/(k-1)
+      	
+	}
+  	}   
+
+	#total residual deviance
+      	totresdev <- sum(resdev[])     
+
+	# treatment effect is zero for control arm       
+	d[1]<-0       
+	
+	# vague priors for treatment effects - loop through treatments
+	for (k in 2:nt){  
+		d[k] ~ dnorm(0,.0001) 
+	}
+
+
+	# Prior for beta
+	beta ~ dunif(-2, 2)
+
+# Linear combinations of d for the additive effects of interventions
+
+for (comp2 in 1:2) {
+  for (comp3 in 1:2) {
+    for (comp4 in 1:2) {
+      for (comp5 in 1:2) {
+        for (comp6 in 1:2) {
+          for (comp7 in 1:2) {
+
+            sumcomp[comp2, comp3, comp4,
+                    comp5, comp6, comp7] <-
+
+              (comp2 - 1) + (comp3 - 1) + (comp4 - 1) +
+              (comp5 - 1) + (comp6 - 1) + (comp7 - 1)
+
+            dall[comp2, comp3, comp4,
+                 comp5, comp6, comp7] <-
+
+              ((comp2 - 1) * d[2] +
+               (comp3 - 1) * d[3] +
+               (comp4 - 1) * d[4] +
+               (comp5 - 1) * d[5] +
+               (comp6 - 1) * d[6] +
+               (comp7 - 1) * d[7]) +
+
+              (sumcomp[comp2, comp3, comp4,
+                       comp5, comp6, comp7] *
+
+               (sumcomp[comp2, comp3, comp4,
+                        comp5, comp6, comp7] - 1) / 2) * beta
+
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+}                         

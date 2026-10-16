@@ -9,4 +9,4 @@ The folder R_files_to_run_models contains R code for running each model.
 
 The folder Results contains R files for analysing the results of the simulation study and producing plots.
 
-The folder Application_to_LOS contains the files to apply the models to the length of stay dataset. The applied example uses data previously published by Freeman et al. (2018) and available online (https://doi.org/10.5281/zenodo.8006703); processed data and scripts required to reproduce the analyses presented in this article are provided in the repository.
+The folder Application_to_LOS contains the files to apply the models to the length of stay dataset, the results of the application and code to produce the forest plot. The applied example uses data previously published by Freeman et al. (2018) and available online (https://doi.org/10.5281/zenodo.8006703); processed data and scripts required to reproduce the analyses presented in this article are provided in the repository. 

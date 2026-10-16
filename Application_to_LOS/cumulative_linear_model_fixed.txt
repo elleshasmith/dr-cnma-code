@@ -6,7 +6,7 @@ model{
 for(i in 1:Ntrials){                      	#   LOOP THROUGH STUDIES
     w[i,1] <- 0    				# adjustment for multi-arm trials is zero for control arm
     delta[i,1] <- 0             		# treatment effect is zero for control arm
-    mu[i] ~ dnorm(0,.01)           		# vague priors for all trial baselines
+    mu[i] ~ dnorm(0,.001)           		# vague priors for all trial baselines
 
     for (k in 1:na[i]) {             		#  LOOP THROUGH ARMS
         prec[i,k] <- n[i,k]/pow(sd[i,k],2)   	# set precisions
